@@ -75,3 +75,9 @@ React, TypeScript, Vite, Capacitor Android, RevenueCat Purchases SDK, Vitest, Pl
 - [Original 1024 x 1024 app icon](assets/app-icon-1024.png)
 - [1179 x 2556 browser home screenshot](assets/screenshot-1179x2556.png)
 - [1179 x 2556 browser rehearsal screenshot](assets/rehearsal-1179x2556.png)
+
+
+## Try it out
+
+- [Live application](https://devpost-revenuecat-shipaton-2026-29969.gilbertcv.com)
+- [Public source](https://github.com/gil906/devpost-revenuecat-shipaton-2026-29969)

@@ -118,3 +118,9 @@ Steady is not HR, legal, medical, or professional advice. It is not suitable for
 The original leaf/conversation icon is generated from `public/icon.svg`. `assets/app-icon-1024.png` is exactly 1024 x 1024. `assets/screenshot-1179x2556.png` and `assets/rehearsal-1179x2556.png` are actual browser-preview captures at exactly 1179 x 2556, without device frames. They are **not native-device or store-release evidence**.
 
 `npm run assets` regenerates icon assets. `npm run test:e2e` captures screenshots under the runtime data directory; `npm run assets:capture` copies those captures into the distributable media directory. Screenshots use only fictional, bundled content.
+
+
+## Try it out
+
+- [Live application](https://devpost-revenuecat-shipaton-2026-29969.gilbertcv.com)
+- [Public source](https://github.com/gil906/devpost-revenuecat-shipaton-2026-29969)
