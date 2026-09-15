@@ -1,0 +1,43 @@
+{
+  "name": "steady-rehearsal",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "dev": "vite --host 0.0.0.0 --port 8764",
+    "build": "tsc --noEmit && vite build",
+    "start": "node server.mjs",
+    "test": "vitest run",
+    "format": "prettier --write src tests scripts *.ts *.mjs *.json public/*.{html,css}",
+    "format:check": "prettier --check src tests scripts *.ts *.mjs *.json public/*.{html,css}",
+    "test:e2e": "node scripts/browser.mjs test",
+    "browser:install": "node scripts/browser.mjs install",
+    "smoke": "node scripts/smoke.mjs",
+    "assets": "node scripts/assets.mjs",
+    "assets:capture": "node scripts/capture-assets.mjs",
+    "android:sync": "npm run build && cap sync android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/app": "^8.0.0",
+    "@capacitor/core": "^8.5.2",
+    "@revenuecat/purchases-capacitor": "13.5.1",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.5.2",
+    "@playwright/test": "1.63.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "sharp": "^0.34.5",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3",
+    "vite": "8.3.0",
+    "vitest": "5.0.1"
+  }
+}
