@@ -43,7 +43,7 @@ npm run format:check
 
 The browser suite and smoke check each own a temporary server on port 8764 and stop it afterward. Stop an existing local server before running them. Chromium is installed inside `node_modules/.cache`; Linux also needs Playwright's [system dependencies](https://playwright.dev/docs/browsers#install-system-dependencies).
 
-Unit tests cover all authored scenarios, wording signals, corrupt storage, retention, draft recovery, and a **mocked SDK gateway** for purchase, cancellation, pending payment, restore, revocation, and expiry. Browser tests exercise the production build end to end, including offline practice, literal rendering of untrusted text, premium gating, storage failures, export, deletion, keyboard focus, and narrow layouts. Mocked purchase tests are not evidence of a real store transaction.
+Unit tests cover all authored scenarios, wording signals, corrupt storage, retention, draft recovery, and a **mocked SDK gateway** for purchase, product filtering, cancellation, pending payment, restore, revocation, and expiry. Browser tests exercise the production build end to end, including offline practice, literal rendering of untrusted text, premium gating, storage failures, verbatim recovery exports, deletion, keyboard focus, and narrow layouts. Mocked purchase tests are not evidence of a real store transaction.
 
 Test output goes under `APP_DATA_DIR` (default `.runtime`). User practice data stays in device/browser local storage, never in repository files.
 
@@ -71,7 +71,7 @@ The debug APK is produced at `android/app/build/outputs/apk/debug/app-debug.apk`
 | Package type | RevenueCat lifetime package (`$rc_lifetime`) |
 | Benefit | Three additional stretch rehearsals |
 
-The one-time product must be attached to the permanent `steady_plus` entitlement. This is a non-renewing library unlock, not a subscription. Prices are taken from the store's localized `priceString`; no price or trial is hardcoded. Only lifetime, non-subscription packages are offered.
+The one-time product must be attached to the permanent `steady_plus` entitlement. This is a non-renewing library unlock, not a subscription. Prices are taken from the store's localized `priceString`; no price or trial is hardcoded. Only lifetime, non-subscription packages for `steady_plus_lifetime` are offered; unrelated products in the current offering are rejected.
 
 `.env.example` documents the single build-time setting. The client accepts an Android public `goog_...` key or a RevenueCat `test_...` key for Test Store builds. It rejects other key formats before bundling. A secret RevenueCat API key must never be used in a client build. Changing configuration requires rebuilding and syncing the native project; test-store purchases are not production purchases.
 
@@ -97,6 +97,8 @@ These are **wording signals, not grades**. The app cannot understand intent, ass
 Rehearsal text never goes to a model, analytics service, or RevenueCat. The app uses fictional scenarios and encourages fictional details. Local storage is not encrypted by Steady; anyone with access to an unlocked device/profile may be able to read it. The Android manifest disables backup and excludes app data from cloud backup and device transfer.
 
 The Android bundle contains the practice library for offline use. Browser practice works offline **after the page is loaded**; there is no service-worker cache for cold-start offline browsing. Purchases need a network connection and follow the SDK's cache behavior. There is no cloud backup, journal import, account system, or cross-device transcript sync. Browser storage eviction or uninstalling may erase local history.
+
+If saved data cannot be read, practice pauses without overwriting it. **Export original data** opens the exact stored text for copying, with a download option in the browser. If clipboard access is unavailable, the text remains selectable. Recovery does not automatically repair data or bypass the explicit deletion confirmation.
 
 Steady is not HR, legal, medical, or professional advice. It is not suitable for evaluating employees or making employment decisions. See the in-app explanation, [privacy policy](public/privacy.html), and [terms](public/terms.html).
 

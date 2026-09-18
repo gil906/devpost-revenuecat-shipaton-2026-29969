@@ -9,6 +9,7 @@ import {
   Billing,
   billingError,
   hasPremium,
+  PLUS_PRODUCT,
   type BillingGateway,
   type EntitlementInfo,
 } from '../src/billing';
@@ -30,7 +31,7 @@ const lifetime: PurchasesPackage = {
     targetingContext: null,
   },
   product: {
-    identifier: 'steady_plus_lifetime',
+    identifier: PLUS_PRODUCT,
     description: 'Three stretch rehearsals',
     title: 'Steady Plus',
     price: 7.99,
@@ -129,6 +130,42 @@ describe('real SDK purchase boundary (gateway mocked, no real charge)', () => {
     );
     expect(sdk.purchasePackage).not.toHaveBeenCalled();
   });
+  it('does not offer an unrelated lifetime product as the Plus unlock', async () => {
+    const sdk = gateway();
+    sdk.getOfferings.mockResolvedValue({
+      current: {
+        availablePackages: [
+          {
+            ...lifetime,
+            product: { ...lifetime.product, identifier: 'unrelated_lifetime' },
+          },
+        ],
+      },
+    });
+    const billing = new Billing(sdk, 'android', 'goog_publicKey');
+    await expect(billing.offerings()).rejects.toThrow('unavailable');
+    await expect(billing.purchase('$rc_lifetime')).rejects.toThrow('available');
+    expect(sdk.purchasePackage).not.toHaveBeenCalled();
+  });
+  it.each([
+    { productCategory: PRODUCT_CATEGORY.SUBSCRIPTION },
+    { subscriptionPeriod: 'P1Y' },
+  ])(
+    'rejects a subscription even if labeled as lifetime: %o',
+    async (product) => {
+      const sdk = gateway();
+      sdk.getOfferings.mockResolvedValue({
+        current: {
+          availablePackages: [
+            { ...lifetime, product: { ...lifetime.product, ...product } },
+          ],
+        },
+      });
+      const billing = new Billing(sdk, 'android', 'goog_publicKey');
+      await expect(billing.offerings()).rejects.toThrow('unavailable');
+      expect(sdk.purchasePackage).not.toHaveBeenCalled();
+    },
+  );
 
   it('invalidates stale packages when an offering refresh fails', async () => {
     const sdk = gateway();

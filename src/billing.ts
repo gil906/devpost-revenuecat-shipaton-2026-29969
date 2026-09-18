@@ -4,6 +4,7 @@ import type {
 } from '@revenuecat/purchases-capacitor';
 
 export const ENTITLEMENT = 'steady_plus';
+export const PLUS_PRODUCT = 'steady_plus_lifetime';
 
 export class OfferingUnavailableError extends Error {}
 
@@ -97,6 +98,7 @@ export class Billing {
       offerings.current?.availablePackages.filter(
         (item) =>
           item.packageType === 'LIFETIME' &&
+          item.product.identifier === PLUS_PRODUCT &&
           item.product.productCategory === 'NON_SUBSCRIPTION' &&
           item.product.subscriptionPeriod === null,
       ) ?? [];

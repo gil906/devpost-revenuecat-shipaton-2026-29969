@@ -26,7 +26,7 @@ The interface uses React and TypeScript, packaged for Android with Capacitor. Th
 
 The feedback engine deliberately makes modest claims. It checks for a situation detail, acknowledgment, a question, and an action with timing, then displays the evidence for those checks. Two authored reactions per turn make practice responsive without pretending to understand a person. These are wording signals, not a validated assessment.
 
-Saved data is versioned and validated. Corrupted data is preserved for recovery rather than silently overwritten. Storage failures are visible. Android backup and device-transfer exclusions support the on-device privacy model.
+Saved data is versioned and validated. Corrupted data is preserved for recovery rather than silently overwritten, with its exact original text available to select and copy before a reset. Storage failures are visible. Android backup and device-transfer exclusions support the on-device privacy model.
 
 ## RevenueCat and monetization
 
@@ -34,7 +34,7 @@ The actual RevenueCat Capacitor SDK is integrated for Android configuration, cur
 
 The model is a one-time **Steady Plus** library unlock through the `steady_plus` entitlement. The three foundation rehearsals and all journal tools stay free. This ties payment to additional practice material instead of charging people to retrieve their own words. There is no recurring subscription or artificially limited number of free attempts.
 
-Localized prices come from the store. Only an active SDK entitlement unlocks premium rehearsals; cancellation, pending approval, or a missing entitlement does not. The browser preview never offers a pretend checkout.
+Localized prices come from the store. The paywall accepts only the designated one-time Plus product, not an unrelated lifetime item or subscription. Only an active SDK entitlement unlocks premium rehearsals; cancellation, pending approval, or a missing entitlement does not. The browser preview never offers a pretend checkout.
 
 The store connection has not yet been exercised with a real configured RevenueCat project. There are no claimed purchases, users, revenue, conversion figures, or live monetization results.
 

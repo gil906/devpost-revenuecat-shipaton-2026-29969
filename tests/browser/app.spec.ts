@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { mkdir } from 'node:fs/promises';
+import { mkdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import sharp from 'sharp';
 import { scenarios } from '../../src/scenarios';
@@ -167,6 +167,64 @@ test('does not overwrite corrupted local data, and recovery requires explicit de
   await expect(
     page.getByRole('heading', { name: /Find your words/ }),
   ).toBeVisible();
+});
+
+test('exports corrupted data verbatim through selectable text and a real download', async ({
+  page,
+}) => {
+  const original = '{"broken":"<img src=x onerror=alert(1)>",\n "draft":';
+  await page.goto('/');
+  await page.evaluate(
+    (raw) => localStorage.setItem('steady.practice.v1', raw),
+    original,
+  );
+  await page.reload();
+  await page.getByRole('button', { name: 'Export original data' }).click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog.getByLabel('Original saved data')).toHaveValue(original);
+  await expect(dialog.locator('img')).toHaveCount(0);
+  const downloadPromise = page.waitForEvent('download');
+  await dialog.getByRole('button', { name: 'Download JSON' }).click();
+  const download = await downloadPromise;
+  expect(download.suggestedFilename()).toBe('steady-recovery.json');
+  expect(await readFile((await download.path())!, 'utf8')).toBe(original);
+  await page.evaluate(() => {
+    Object.defineProperty(navigator.clipboard, 'writeText', {
+      value: async () => {
+        throw new DOMException('Clipboard unavailable', 'NotAllowedError');
+      },
+    });
+  });
+  await dialog.getByRole('button', { name: 'Copy original data' }).click();
+  await expect(dialog.getByRole('status')).toContainText(
+    'Select the text above',
+  );
+  expect(
+    await page.evaluate(() => localStorage.getItem('steady.practice.v1')),
+  ).toBe(original);
+  await dialog.getByRole('button', { name: 'Close dialog' }).click();
+  await expect(
+    page.getByRole('button', { name: 'Export original data' }),
+  ).toBeFocused();
+});
+
+test('does not invent an empty recovery export if the original data disappears', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await page.evaluate(() => localStorage.setItem('steady.practice.v1', '{'));
+  await page.reload();
+  await page.evaluate(() => localStorage.removeItem('steady.practice.v1'));
+  await page.getByRole('button', { name: 'Export original data' }).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(
+    page.getByText('No saved data was found to export.', { exact: false }),
+  ).toBeVisible();
+  await page.getByRole('button', { name: 'Retry reading' }).click();
+  await expect(
+    page.getByRole('heading', { name: /Find your words/ }),
+  ).toBeVisible();
+  await expect(page.getByRole('alert')).toHaveCount(0);
 });
 
 test('shows explicit storage failure without pretending a rehearsal was saved', async ({

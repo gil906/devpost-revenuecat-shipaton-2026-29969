@@ -26,7 +26,7 @@ import type {
 } from './types';
 
 type Page = 'practice' | 'journal' | 'scenario' | 'rehearsal' | 'result';
-type Modal = 'plus' | 'privacy' | 'export' | 'erase' | null;
+type Modal = 'plus' | 'privacy' | 'export' | 'recovery' | 'erase' | null;
 const categories: ('All' | Category)[] = [
   'All',
   'Feedback',
@@ -191,6 +191,7 @@ export function App() {
   const [notice, setNotice] = useState('');
   const [formError, setFormError] = useState('');
   const [copied, setCopied] = useState('');
+  const [recoveryText, setRecoveryText] = useState('');
   const billing = useBilling();
   const heading = useRef<HTMLHeadingElement>(null);
   const draft = state.draft;
@@ -370,6 +371,8 @@ export function App() {
   }
 
   const journalText = exportJournal(state);
+  const recovering = modal === 'recovery';
+  const exportText = recovering ? recoveryText : journalText;
   const completedScenarios = new Set(
     state.sessions.map((item) => item.scenarioId),
   );
@@ -460,10 +463,17 @@ export function App() {
                   className="button secondary"
                   onClick={() => {
                     try {
-                      downloadText(
-                        localStorage.getItem(STORAGE_KEY) ?? '',
-                        'steady-recovery.json',
-                      );
+                      const raw = localStorage.getItem(STORAGE_KEY);
+                      if (raw === null) {
+                        setSaveError(
+                          'No saved data was found to export. Retry reading to check the current storage state.',
+                        );
+                        return;
+                      }
+                      setRecoveryText(raw);
+                      setCopied('');
+                      setSaveError('');
+                      setModal('recovery');
                     } catch {
                       setSaveError(
                         'The original data could not be accessed for export. Check your browser storage permissions.',
@@ -478,7 +488,10 @@ export function App() {
                   onClick={() => {
                     const loaded = initialData();
                     setLoadError(loaded.error);
-                    if (!loaded.error) setState(loaded.state);
+                    if (!loaded.error) {
+                      setState(loaded.state);
+                      setSaveError('');
+                    }
                   }}
                 >
                   Retry reading
@@ -1369,22 +1382,35 @@ export function App() {
           </p>
         </ModalDialog>
       )}
-      {modal === 'export' && (
-        <ModalDialog title="Keep your own copy." onClose={() => setModal(null)}>
-          <p>
-            This export contains your words, readiness ratings, and unfinished
-            draft. Store it somewhere private. Import is not supported in this
-            version.
-          </p>
+      {(modal === 'export' || modal === 'recovery') && (
+        <ModalDialog
+          title={
+            recovering ? 'Protect your original data.' : 'Keep your own copy.'
+          }
+          onClose={() => setModal(null)}
+        >
+          {recovering ? (
+            <p>
+              This is the exact saved text that could not be read, without
+              repairs or changes. Copy it somewhere private before resetting.
+              Import and automatic repair are not supported in this version.
+            </p>
+          ) : (
+            <p>
+              This export contains your words, readiness ratings, and unfinished
+              draft. Store it somewhere private. Import is not supported in this
+              version.
+            </p>
+          )}
           <label className="response-label" htmlFor="journal-export">
-            Journal JSON
+            {recovering ? 'Original saved data' : 'Journal JSON'}
           </label>
           <textarea
             id="journal-export"
             className="export-text"
             rows={8}
             readOnly
-            value={journalText}
+            value={exportText}
             onFocus={(event) => event.target.select()}
           />
           <div className="actions">
@@ -1392,9 +1418,9 @@ export function App() {
               className="button primary"
               onClick={async () => {
                 try {
-                  await navigator.clipboard.writeText(journalText);
+                  await navigator.clipboard.writeText(exportText);
                   setCopied(
-                    'Journal copied. Your clipboard now contains private practice data.',
+                    'Data copied. Your clipboard now contains private practice data.',
                   );
                 } catch {
                   setCopied(
@@ -1403,12 +1429,17 @@ export function App() {
                 }
               }}
             >
-              Copy journal
+              {recovering ? 'Copy original data' : 'Copy journal'}
             </button>
             {!Capacitor.isNativePlatform() && (
               <button
                 className="button secondary"
-                onClick={() => downloadText(journalText, 'steady-journal.json')}
+                onClick={() =>
+                  downloadText(
+                    exportText,
+                    recovering ? 'steady-recovery.json' : 'steady-journal.json',
+                  )
+                }
               >
                 Download JSON
               </button>
